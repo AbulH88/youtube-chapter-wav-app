@@ -11,4 +11,4 @@ numbered, lossless 16-bit PCM WAV files—one per YouTube chapter.
 Downloaded audio and other temporary media are removed automatically. Videos
 without chapter markers are saved as one WAV file.
 
-Keep this entire app folder together. The private tools folder is required.
+Keep this entire app folder together. The tools folder and SharedLog.ps1 are required.

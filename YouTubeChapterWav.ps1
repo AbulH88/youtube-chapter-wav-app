@@ -4,6 +4,7 @@ Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
 $script:appDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $script:appDir 'SharedLog.ps1')
 $script:workerPath = Join-Path $script:appDir 'Worker.ps1'
 $script:toolDir = Join-Path $script:appDir 'tools'
 $script:activeProcess = $null
@@ -135,7 +136,7 @@ function Add-VisibleLogLine {
 function Read-NewLogLines {
     if (-not $script:activeLogPath -or -not (Test-Path -LiteralPath $script:activeLogPath)) { return }
     try {
-        $lines = @(Get-Content -LiteralPath $script:activeLogPath -ErrorAction Stop)
+        $lines = @(Read-SharedLogLines -Path $script:activeLogPath)
         if ($lines.Count -gt $script:lastLogLineCount) {
             for ($i = $script:lastLogLineCount; $i -lt $lines.Count; $i++) {
                 Add-VisibleLogLine ([string]$lines[$i])

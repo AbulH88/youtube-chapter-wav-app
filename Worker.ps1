@@ -6,6 +6,9 @@ param(
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 
+$workerDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $workerDir 'SharedLog.ps1')
+
 $config = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
 $url = [string]$config.Url
 $outputRoot = [string]$config.OutputRoot
@@ -21,14 +24,14 @@ $exitCode = 1
 function Write-JobLog {
     param([string]$Message)
     $timestamp = Get-Date -Format 'HH:mm:ss'
-    Add-Content -LiteralPath $logPath -Value "[$timestamp] $Message" -Encoding UTF8
+    Add-SharedLogLine -Path $logPath -Line "[$timestamp] $Message"
 }
 
 function Write-Marker {
     param([string]$Name, [string]$Value)
     $bytes = [System.Text.Encoding]::Unicode.GetBytes($Value)
     $encoded = [Convert]::ToBase64String($bytes)
-    Add-Content -LiteralPath $logPath -Value "::$Name::$encoded" -Encoding UTF8
+    Add-SharedLogLine -Path $logPath -Line "::$Name::$encoded"
 }
 
 function Get-SafeName {
@@ -94,7 +97,7 @@ function Invoke-LoggedTool {
 try {
     New-Item -ItemType Directory -Path $jobDir -Force | Out-Null
     New-Item -ItemType Directory -Path (Split-Path -Parent $logPath) -Force | Out-Null
-    Set-Content -LiteralPath $logPath -Value '' -Encoding UTF8
+    Initialize-SharedLog -Path $logPath
 
     if (-not (Test-Path -LiteralPath $ytDlp -PathType Leaf)) { throw 'yt-dlp.exe is missing from the app tools folder.' }
     if (-not (Test-Path -LiteralPath $ffmpeg -PathType Leaf)) { throw 'ffmpeg.exe is missing from the app tools folder.' }
